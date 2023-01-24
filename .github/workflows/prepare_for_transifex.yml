@@ -1,0 +1,37 @@
+name: Prepare for Transifex
+
+on:
+  workflow_dispatch:  # click the button on Github repo!
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install polib
+        pip install antx
+        pip install botok
+        pip install pandas
+    - name: Build Transifex Assets
+      run: |
+        chmod +x scripts/run_first_phase.sh 
+        scripts/run_first_phase.sh
+    - name: Make Commit
+      run: |
+        git config --global user.email mailme@mikkokotila.com
+        git config --global user.name "Mikko Kotila"
+        git checkout -b "first_phase"
+        git add --all
+        git commit -m "First Phase"
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: transifex
